@@ -42,10 +42,9 @@ public class ReaderActivity extends Activity {
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public static final String TAG = "NfcDemo";
     public static final String INFO_READ_TEXT = "Lütfen NFC Tagını Okutunuz.";
-    public static final String TAG_Value = "A87A";
 
-    private TextView readerInfo;
-    private NfcAdapter mNfcAdapter;
+    TextView readerInfo;
+
     Button closeOrginalLButton;
     LinearLayout orginalLayout;
 
@@ -55,8 +54,10 @@ public class ReaderActivity extends Activity {
 
     PopupWindow currentWindow;
 
-    String productId;
+    String productInf;
+
     ImageLoader imageLoader = ImageLoader.getInstance();
+    private NfcAdapter mNfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,7 @@ public class ReaderActivity extends Activity {
         //NFC ------
         checkNFC();
         //------
+
         handleIntent(getIntent());
 
         //--Layout initialize
@@ -89,12 +91,13 @@ public class ReaderActivity extends Activity {
             public void onClick(View v) {
 
                 Intent reportIntent = new Intent(ReaderActivity.this, ReportLocationActivity.class);
-                reportIntent.putExtra("productId", productId);
+                reportIntent.putExtra("productId", productInf);
                 startActivity(reportIntent);
 
                 errorLayout.setVisibility(View.GONE);
             }
         });
+
         closeELButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,7 +133,6 @@ public class ReaderActivity extends Activity {
         }
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -147,13 +149,6 @@ public class ReaderActivity extends Activity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        /**
-         * This method gets called, when a new Intent gets associated with the current activity instance.
-         * Instead of creating a new activity, onNewIntent will be called. For more information have a look
-         * at the documentation.
-         *
-         * In our case this method gets called, when the user attaches a Tag to the device.
-         */
         handleIntent(intent);
     }
 
@@ -161,6 +156,7 @@ public class ReaderActivity extends Activity {
      * @param activity The corresponding {@link Activity} requesting the foreground dispatch.
      * @param adapter  The {@link NfcAdapter} used for the foreground dispatch.
      */
+
     public static void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
         final Intent intent = new Intent(activity.getApplicationContext(), activity.getClass());
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -285,16 +281,6 @@ public class ReaderActivity extends Activity {
         }
 
         private String readText(NdefRecord record) throws UnsupportedEncodingException {
-        /*
-         * See NFC forum specification for "Text Record Type Definition" at 3.2.1
-         *
-         * http://www.nfc-forum.org/specs/
-         *
-         * bit_7 defines encoding
-         * bit_6 reserved for future use, must be 0
-         * bit_5..0 length of IANA language code
-         */
-
             byte[] payload = record.getPayload();
 
             // Get the Text Encoding
@@ -344,6 +330,7 @@ public class ReaderActivity extends Activity {
         TextView productModel = (TextView) this.findViewById(R.id.productModel);
         TextView productSerial = (TextView) this.findViewById(R.id.productSerial);
         ImageView productImage = (ImageView) this.findViewById(R.id.productImage);
+        productImage.setImageResource(R.drawable.orginal);
 
         try {
             productBrand.setText("Marka : "+product.getString("brand"));

@@ -1,8 +1,10 @@
 package com.cpiss.genunie;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -10,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -54,7 +57,7 @@ public class ReportLocationActivity extends AppCompatActivity implements OnMapRe
         productId = getIntent().getStringExtra("productId");
 
         gpsLoadingLayout = (RelativeLayout) findViewById(R.id.gpsLoadingLayout);
-        gotoNextButton= (Button) findViewById(R.id.gotoNextButton);
+        gotoNextButton = (Button) findViewById(R.id.gotoNextButton);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -67,9 +70,9 @@ public class ReportLocationActivity extends AppCompatActivity implements OnMapRe
             public void onClick(View v) {
                 Intent reportIntent = new Intent(ReportLocationActivity.this, ReportPhotoActivity.class);
 
-                reportIntent.putExtra("productId",productId);
-                reportIntent.putExtra("lat",((Location)v.getTag()).getLatitude());
-                reportIntent.putExtra("long",((Location)v.getTag()).getLongitude());
+                reportIntent.putExtra("productId", productId);
+                reportIntent.putExtra("lat", ((Location) v.getTag()).getLatitude());
+                reportIntent.putExtra("long", ((Location) v.getTag()).getLongitude());
 
                 startActivity(reportIntent);
                 finish();
@@ -99,6 +102,18 @@ public class ReportLocationActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onMapReady(GoogleMap map) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            Intent reportIntent = new Intent(ReportLocationActivity.this, ReportPhotoActivity.class);
+
+            reportIntent.putExtra("productId", productId);
+            reportIntent.putExtra("lat", "-");
+            reportIntent.putExtra("long", "-");
+
+            startActivity(reportIntent);
+            return;
+        }
+
         mMap = map;
         mMap.setMyLocationEnabled(true);
 
@@ -106,6 +121,8 @@ public class ReportLocationActivity extends AppCompatActivity implements OnMapRe
         mUiSettings.setZoomControlsEnabled(false);
         mUiSettings.setMapToolbarEnabled(true);
         mUiSettings.setMyLocationButtonEnabled(true);
+
+
     }
 
 
@@ -127,14 +144,25 @@ public class ReportLocationActivity extends AppCompatActivity implements OnMapRe
     @Override
     protected void onResume() {
         super.onResume();
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+
+        }else{
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        }
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        locationManager.removeUpdates(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }else{
+            locationManager.removeUpdates(this);
+        }
+
     }
 
     @Override
